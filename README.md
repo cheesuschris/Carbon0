@@ -2,10 +2,6 @@
 Our Princeton 2025 Hackathon main Github Repository!!!
 
 ## Project Explanation
-
-First Rough Ideas: 
-
-Rough Explanation: 
 N/A yet
 
 ## Tech Stack
