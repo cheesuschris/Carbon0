@@ -19,7 +19,7 @@ React & TypeScript, xAI, CSV Storage
 ## Video Demonstration
 N/A yet
 
-## To Run locally:
-[]
+## To Run:
+N/A yet, insert a local development link and a website
 
 ```{}
