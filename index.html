@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon0 - Track Your Carbon Footprint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="/assets/logo.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .animated-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            opacity: 0.12;
+        }
+        
+        .line {
+            position: absolute;
+            width: 200%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+            animation: roll 15s linear infinite;
+        }
+        
+        .line:nth-child(1) { top: 10%; animation-duration: 20s; animation-delay: 0s; }
+        .line:nth-child(2) { top: 25%; animation-duration: 25s; animation-delay: 2s; }
+        .line:nth-child(3) { top: 40%; animation-duration: 18s; animation-delay: 4s; }
+        .line:nth-child(4) { top: 55%; animation-duration: 22s; animation-delay: 1s; }
+        .line:nth-child(5) { top: 70%; animation-duration: 19s; animation-delay: 3s; }
+        .line:nth-child(6) { top: 85%; animation-duration: 24s; animation-delay: 5s; }
+        
+        @keyframes roll {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0%); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 1.2s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-emerald-900 via-emerald-700 to-teal-600 min-h-screen text-white relative">
+    
+    <div class="animated-lines">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+    </div>
+
+    <div class="relative z-10">
+        
+        <header class="container mx-auto px-6 py-8">
+
+            <div class="flex items-center gap-3">
+                <img src="/assets/logo.png" alt = "Carbon0" class = "h-12">
+                <span class="text-3xl font-bold tracking-tight">Carbon0</span>
+            </div>
+        </header>
+
+        <main class="container mx-auto px-6 py-12 md:py-20">
+            <div class="max-w-5xl mx-auto">
+                
+                <div class="text-center mb-16 fade-in">
+                    <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                        Track Your Purchasing<br/>Carbon Footprint
+                    </h1>
+                    <p class="text-xl md:text-2xl text-emerald-50 max-w-2xl mx-auto">
+                        Monitor and reduce your carbon footprint as you browse and shop online
+                    </p>
+                </div>
+
+                <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-12 text-gray-900 fade-in">
+                    <div class="flex items-center gap-4 mb-8">
+                        <h2 class="text-3xl md:text-4xl font-bold">Getting Started</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="flex gap-6 items-start">
+                            <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-700 font-bold text-lg">
+                                1
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2">Download the Extension</h3>
+                                <p class="text-gray-600 leading-relaxed">
+                                    Navigate to the related github and download the folder called "extension". Or click the download button below.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-6 items-start">
+                            <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-700 font-bold text-lg">
+                                2
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2">Enable the Extension</h3>
+                                <p class="text-gray-600 leading-relaxed">
+                                    Open Chrome/Edge, navigate to your extensions, and enable "Developer mode". Click "Load unpacked" and select the downloaded folder.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-6 items-start">
+                            <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-700 font-bold text-lg">
+                                3
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2">Start Shopping</h3>
+                                <p class="text-gray-600 leading-relaxed">
+                                    Navigate to any shopping website's product page. Click the extension icon in the toolbar. Click "Read Product Info".                             
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-lg p-6 mt-8">
+                            <div class="flex gap-3">
+                                <svg class="w-6 h-6 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <h4 class="font-semibold text-emerald-900 mb-1">Pro Tip</h4>
+                                    <p class="text-emerald-800 text-sm">
+                                        Pin the Carbon0 extension to your toolbar for quick access to your shopping carbon footprint.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href = "./extension.zip" download>
+                            <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg">
+                                Install Extension
+                            </button>
+                        </a>
+                        <a href = "https://github.com/cheesuschris/Carbon0/tree/main">
+                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg transition-all">
+                                View Documentation
+                            </button>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <footer class="container mx-auto px-6 py-12">
+            <div class="max-w-5xl mx-auto">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 text-center">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+                        <div class="text-4xl font-bold mb-2">
+                            <!-- INSERT THE SERVER-SIDE COMPONENTS HERE -->
+                             <p>REPLACE THIS</p>
+                        </div>
+                        <div class="text-emerald-100 text-sm">Tons of Carbon Reduction</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+                        <div class="text-4xl font-bold mb-2">
+                            <!-- INSERT THE SERVER-SIDE COMPONENTS HERE -->
+                            <p>REPLACE THIS</p>
+                        </div>
+                        <div class="text-emerald-100 text-sm">Active Users</div>
+                    </div>
+                </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                        <div class="md:col-span-2">
+                            <div class="flex items-center gap-3 mb-4">
+                                <img src="/assets/logo.png" alt = "Carbon0" class = "h-12">
+                                <span class="text-2xl font-bold">Carbon0</span>
+                            </div>
+                            <p class="text-emerald-100 text-sm max-w-xs">
+                                Making the internet sustainable, one click at a time. Track, analyze, and reduce your digital carbon footprint effortlessly.
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider">Product</h3>
+                            <ul class="space-y-2 text-sm text-emerald-100">
+                                <li><a href="#" class="hover:text-white transition">Features</a></li>
+                                <li><a href="#" class="hover:text-white transition">Pricing</a></li>
+                                <li><a href="#" class="hover:text-white transition">Documentation</a></li>
+                                <li><a href="#" class="hover:text-white transition">API</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider">Company</h3>
+                            <ul class="space-y-2 text-sm text-emerald-100">
+                                <li><a href="#" class="hover:text-white transition">About Us</a></li>
+                                <li><a href="#" class="hover:text-white transition">Blog</a></li>
+                                <li><a href="#" class="hover:text-white transition">Careers</a></li>
+                                <li><a href="#" class="hover:text-white transition">Contact</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-emerald-100">
+                        <p>&copy; 2025 Carbon0. All rights reserved.</p>
+                        <div class="flex gap-6">
+                            <a href="mailto:hello@carbon0.com" class="hover:text-white transition">carbon0@gmail.com</a>
+                            <a href="#" class="hover:text-white transition">Privacy Policy</a>
+                            <a href="#" class="hover:text-white transition">Terms of Service</a>
+                        </div>
+                    </div>
+
+            </div>
+        </footer>
+
+    </div>
+</body>
+</html>

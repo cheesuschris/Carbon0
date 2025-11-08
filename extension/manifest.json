@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Carbon0",
+  "version": "1.0",
+  "description": "Analyze product carbon footprint and find eco-friendly alternatives",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://www.amazon.com/*",
+    "https://www.walmart.com/*",
+    "https://www.etsy.com/*",
+    "https://www.bestbuy.com/*",
+    "https://www.target.com/*",
+    "https://www.ebay.com/*",
+    "http://localhost:5000/*",
+    "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.amazon.com/*",
+        "https://www.walmart.com/*",
+        "https://www.etsy.com/*",
+        "https://www.bestbuy.com/*",
+        "https://www.target.com/*",
+        "https://www.ebay.com/*"
+      ],
+      "js": ["platforms.js", "content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "logo.png",
+      "48": "logo.png",
+      "128": "logo.png"
+    }
+  }
+}
