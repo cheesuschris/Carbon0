@@ -11,7 +11,7 @@ This app is aimed to educate people on their spending habits and financial liter
 - Also, instead of the rows having prices, maybe the items (the elements in this matrix) have associated prices. The columns will correspond to a specific category.
 
 ## Tech Stack
-React & TypeScript, xAI, CSV Storage
+MTRN + xAI
 
 ## Figma Designs
 [Page Designs](https://www.figma.com/design/eP5EFWIaRx4NOIUIEkN0Ho/HackPrinceton2025?node-id=0-1&t=r9USfroCeMJX6Jit-1)
