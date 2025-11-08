@@ -1,5 +1,5 @@
-# HackPrinceton2025
-The Princeton 2025 Hackathon Github Repository :)
+# Carbon0
+Our Princeton 2025 Hackathon main Github Repository :)
 
 ## How to use - Safa
 
@@ -28,3 +28,5 @@ N/A yet
 N/A yet, insert a local development link and a website
 
 ```{}
+
+```
