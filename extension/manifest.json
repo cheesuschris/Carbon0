@@ -32,9 +32,9 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "../assets/logo.png",
-      "48": "../assets/logo.png",
-      "128": "../assets/logo.png"
+      "16": "logo.png",
+      "48": "logo.png",
+      "128": "logo.png"
     }
   }
 }
