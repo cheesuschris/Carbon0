@@ -30,7 +30,7 @@ The backend will run on `http://localhost:5000`
 #### Extension Setup:
 1. Open Chrome/Edge and go to `chrome://extensions/`
 2. Enable "Developer mode" (toggle in top right)
-3. Click "Load unpacked" and select this folder
+3. Click "Load unpacked" and select the extension folder
 4. Navigate to any supported product page:
    - Amazon: `https://www.amazon.com/...`
    - Walmart: `https://www.walmart.com/...`
@@ -66,12 +66,3 @@ Receives product data in JSON format:
 
 ### Video Demonstration
 N/A yet
-
-### To Run:
-
-- Open Chrome/Edge and go to `chrome://extensions/`
-- Enable "Developer mode"
-- Click "Load unpacked" and select the extension folder
-- Navigate to any Amazon product page
-- Click the extension icon in the toolbar
-- Click "Read Product Info"
