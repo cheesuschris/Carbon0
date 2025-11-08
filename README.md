@@ -1,16 +1,16 @@
-# Carbon0
-Our Princeton 2025 Hackathon main Github Repository!!!
+## Carbon0
+By Chris Wu, Safa Obuz, Ariji Chakma, Kaijie Lai
 
-## Project Explanation
+### Project Explanation
 N/A yet
 
-## Tech Stack
+### Tech Stack
 N/A yet
 
-## Video Demonstration
+### Video Demonstration
 N/A yet
 
-## To Run:
+### To Run:
 
 - Open Chrome/Edge and go to `chrome://extensions/`
 - Enable "Developer mode"
