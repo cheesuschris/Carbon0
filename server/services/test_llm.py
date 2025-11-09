@@ -1,4 +1,4 @@
-from llm import call_llm
+from server.services.llm import call_llm
 
 def main():
     prompt = "Explain how Gemini (Google) works in a few words."

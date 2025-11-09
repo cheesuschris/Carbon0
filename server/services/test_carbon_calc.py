@@ -1,5 +1,5 @@
 import math
-from carbon_calc import calculate_carbon_footprint
+from server.services.carbon_calc import calculate_carbon_footprint
 
 carbon_input = {
     "materials": [
