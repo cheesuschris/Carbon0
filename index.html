@@ -163,24 +163,16 @@
         <footer class="container mx-auto px-6 py-12">
             <div class="max-w-5xl mx-auto">
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 text-center">
+                <div class="grid grid-cols-1 md:grid-cols-1 gap-8 mb-12 text-center">
                     <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                         <div class="text-4xl font-bold mb-2">
-                            <!-- INSERT THE SERVER-SIDE COMPONENTS HERE -->
-                             <p>REPLACE THIS</p>
+                             <span id="carbon-total">0</span> kg
                         </div>
-                        <div class="text-emerald-100 text-sm">Tons of Carbon Reduction</div>
-                    </div>
-                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-                        <div class="text-4xl font-bold mb-2">
-                            <!-- INSERT THE SERVER-SIDE COMPONENTS HERE -->
-                            <p>REPLACE THIS</p>
-                        </div>
-                        <div class="text-emerald-100 text-sm">Active Users</div>
+                        <div class="text-emerald-100 text-sm">Tons of Carbon Emissions Reduced</div>
                     </div>
                 </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                    <div class="grid md:grid-cols-8 gap-8 mb-8">
                         <div class="md:col-span-2">
                             <div class="flex items-center gap-3 mb-4">
                                 <img src="/assets/logo.png" alt = "Carbon0" class = "h-12">
@@ -190,6 +182,13 @@
                                 Making the internet sustainable, one click at a time. Track, analyze, and reduce your digital carbon footprint effortlessly.
                             </p>
                         </div>
+
+                        <div class="hidden sm:block"></div>
+                        <div class="hidden sm:block"></div>
+                        <div class="hidden sm:block"></div>
+                        <div class="hidden sm:block"></div>
+
+
                         
                         <div>
                             <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider">Product</h3>
@@ -225,5 +224,40 @@
         </footer>
 
     </div>
+<script>
+    async function loadCarbonTotal() {
+        try {
+            const response = await fetch('http://localhost:5000/api/carbon-total');
+            const data = await response.json();            
+            if (response.ok) {
+                const totalElement = document.getElementById('carbon-total');
+                const total = data.total || 0;
+                animateValue(totalElement, 0, total, 2000);
+            } else {
+                console.error('Failed to load carbon total:', data.error);
+                document.getElementById('carbon-total').textContent = '0';
+            }
+        } catch (error) {
+            console.error('Error fetching carbon total:', error);
+            document.getElementById('carbon-total').textContent = '0';
+        }
+        function animateValue(element, start, end, duration) {
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = current.toFixed(1);
+            }, 16);
+        }
+        loadCarbonTotal();
+        setInterval(loadCarbonTotal, 30000);
+    }
+</script>
 </body>
 </html>
