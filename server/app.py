@@ -1,8 +1,13 @@
 from flask import Flask, jsonify, request, send_from_directory
+from flask_pymongo import PyMongo
 from flask_cors import CORS
 import os
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
+app.config['MONGO_URI'] = 'mongodb+srv://cheesus:Coolchris1@cluster0.ovfnl.mongodb.net/Carbon0_database?retryWrites=true&w=majority&appName=Cluster0'
+app.config['SECRET_KEY'] = os.urandom(16)
+mongo = PyMongo(app)
+
 CORS(app)
 
 
@@ -13,6 +18,44 @@ def home():
         'message': 'Welcome to the Carbon0 Flask server',
         'status': 'running'
     })
+
+@app.route('/cart/checkout', methods=['POST'])
+def cart_checkout():
+    try:
+        data = request.get_json()
+        amount = data.get('amount')
+        if not mongo.db.TotalCarbonReduced.find_one():
+            mongo.db.TotalCarbonReduced.insert_one({'Total': amount})
+            return jsonify({
+                'message': 'Carbon reduction tracked',
+                'total': amount,
+                'added': amount
+            }), 201
+        else:
+            new_amount = mongo.db.TotalCarbonReduced.find_one().get('Total') + amount
+            mongo.db.TotalCarbonReduced.update_one(
+                {'_id': mongo.db.TotalCarbonReduced.find_one()['_id']},
+                {'$set': {'Total': new_amount}}
+            )
+            return jsonify({
+                'message': 'Carbon reduction updated',
+                'Total': new_amount,
+                'added': amount
+            }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/carbon-total', methods=['GET'])
+def get_carbon_total():
+    try:
+        doc = mongo.db.TotalCarbonReduced.find_one()
+        if doc:
+            total = doc.get('Total', 0)
+            return jsonify({'total': total}), 200
+        else:
+            return jsonify({'total': 0}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/config/gemini-key', methods=['GET'])
 def get_gemini_key():

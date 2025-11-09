@@ -51,6 +51,7 @@
     .loading {
       color: #1976d2;
       padding: 10px;
+      font-size: 20px;
       text-align: center;
     }
     .success {
@@ -86,12 +87,13 @@
   </style>
 </head>
 <body>
-  <div class="header">🌱 Carbon0</div>
+  <div class="header">
+    <img src="minilogo.png" alt="C0 Logo"> Carbon0
+  </div>
   <div id="productInfo" class="product-info">
-    <div style="text-align: center; color: #666;">Click the button to analyze product carbon footprint</div>
+    <div style="font-weight: bold; font-size: 20px; text-align: center;">Click on the button below to analyze this product's carbon footprint!</div>
   </div>
   <button id="readBtn">Analyze Product</button>
-  <script src="sdk-loader.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

@@ -13,7 +13,9 @@
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+      background: 
+        linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(40, 40, 40, 0.85) 100%),
+        url('https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=1920&q=80') center/cover no-repeat fixed;
       min-height: 100vh;
       padding: 20px;
     }
@@ -194,27 +196,60 @@
     .remove-btn:hover {
       background: #d32f2f;
     }
+    .finish-btn {
+      width: 100%;
+      padding: 16px 24px;
+      margin-top: 24px;
+      background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+
+    .finish-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+      background: linear-gradient(135deg, #66BB6A 0%, #4CAF50 100%);
+    }
+
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      top: -10px;
+      z-index: 9999;
+      animation: confetti-fall linear forwards;
+    }
+
+    @keyframes confetti-fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
   </style>
+  <link rel="icon" type="image/png" href="../static/minilogo.png">
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>🌱 Carbon0 Cart</h1>
-      <p>Track your eco-friendly alternatives and CO₂ savings</p>
+      <h1><img src="../static/minilogo.png" alt="C0 Logo">Carbon0 Cart</h1>
+      <p>Track your eco-friendly alternatives and carbon emission savings!</p>
     </div>
     
     <div class="stats-bar">
       <div class="stat-item">
         <div class="stat-value" id="total-alternatives">0</div>
-        <div class="stat-label">Alternatives</div>
+        <div class="stat-label">Alternatives Discovered</div>
       </div>
       <div class="stat-item">
         <div class="stat-value" id="total-co2-saved">0 kg</div>
-        <div class="stat-label">CO₂ Saved</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="total-products">0</div>
-        <div class="stat-label">Products Analyzed</div>
+        <div class="stat-label">Carbon Emissions Reduced</div>
       </div>
     </div>
     
@@ -222,7 +257,7 @@
       <div id="cart-container">
         <div class="empty-state">
           <h2>Your cart is empty</h2>
-          <p>Start browsing products and add eco-friendly alternatives to see your CO₂ savings!</p>
+          <p>Start browsing products and add eco-friendly alternatives to see your smart carbon emission savings!</p>
         </div>
       </div>
     </div>

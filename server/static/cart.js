@@ -61,11 +61,8 @@ function removeFromCart(id) {
 function calculateStats() {
   const totalAlternatives = cartData.length;
   const totalCO2Saved = cartData.reduce((sum, item) => sum + (item.alternative.co2Saved || 0), 0);
-  const uniqueProducts = new Set(cartData.map(item => item.original.url)).size;
-  
   document.getElementById('total-alternatives').textContent = totalAlternatives;
   document.getElementById('total-co2-saved').textContent = totalCO2Saved.toFixed(1) + ' kg';
-  document.getElementById('total-products').textContent = uniqueProducts;
 }
 
 function renderCart() {
@@ -75,13 +72,13 @@ function renderCart() {
     container.innerHTML = `
       <div class="empty-state">
         <h2>Your cart is empty</h2>
-        <p>Start browsing products and add eco-friendly alternatives to see your CO₂ savings!</p>
+        <p>Start browsing products and add eco-friendly alternatives to see your smart carbon emissions savings!</p>
       </div>
     `;
     calculateStats();
     return;
   }
-  
+
   const groupedByOriginal = {};
   cartData.forEach(item => {
     const key = item.original.url || item.original.name;
@@ -114,33 +111,81 @@ function renderCart() {
       const alt = item.alternative;
       html += `
         <div class="alternative-item">
-          ${alt.image ? `<img src="${alt.image}" alt="${alt.name}" class="product-image" onerror="this.style.display='none'">` : ''}
+          ${alt.image ? `<img src="${alt.image}" alt="alternative" class="product-image" onerror="this.style.display='none'">` : ''}
           <div class="product-info">
-            <div class="product-name">${alt.name}</div>
             <div class="product-details">
-              ${alt.price ? `<div class="detail-item"><strong>Price:</strong> ${alt.price}</div>` : ''}
-              ${alt.merchant ? `<div class="detail-item"><strong>Merchant:</strong> ${alt.merchant}</div>` : ''}
               ${alt.url ? `<div class="detail-item"><strong>URL:</strong> <a href="${alt.url}" target="_blank">View Product</a></div>` : ''}
-            </div>
-            <div style="margin-top: 8px;">
-              ${alt.co2Score !== undefined ? `<span class="co2-badge">CO₂: ${alt.co2Score} kg</span>` : ''}
-              ${alt.co2Saved !== undefined ? `<span class="co2-saved" style="margin-left: 8px;">Saved: ${alt.co2Saved} kg</span>` : ''}
+              ${alt.C0Score ? `<div class="detail-item"><strong>Price:</strong> ${alt.C0Score}</div>` : ''}
+              ${alt.explanation ? `<div class="detail-item"><strong>Merchant:</strong> ${alt.explanation}</div>` : ''}
             </div>
           </div>
           <button class="remove-btn" onclick="removeFromCart('${item.id}')">Remove</button>
         </div>
       `;
     });
-    
+
     html += `
         </div>
       </div>
     `;
   });
+      
+  if (cartData.length !== 0) {
+    html += `<button class="finish-btn" onclick="finishCheckout()">I've finished checking out all these websites!</button>`
+  }
   
   container.innerHTML = html;
   calculateStats();
 }
+
+function createConfetti() {
+  const colors = ['#4CAF50', '#8BC34A', '#66BB6A', '#81C784', '#A5D6A7'];
+  const confettiCount = 100;
+  
+  for (let i = 0; i < confettiCount; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 3 + 's';
+    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    document.body.appendChild(confetti);
+    
+    setTimeout(() => confetti.remove(), 5000);
+  }
+}
+
+async function finishCheckout() {
+  const totalCO2Saved = cartData.reduce((sum, item) => {
+    return sum + (item.alternative.co2Saved || 0);
+  }, 0);
+  try {
+    const response = await fetch('http://localhost:5000/cart/checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ amount: totalCO2Saved })
+    });
+    const data = await response.json();
+    if (response.ok) {
+      console.log('Checkout successful:', data);
+      createConfetti();
+      setTimeout(() => {
+        cartData = [];
+        saveCart();
+      }, 1000);
+    } else {
+      console.error('Checkout failed:', data.error);
+      alert('Failed to complete checkout: ' + data.error);
+    }
+  } catch (error) {
+    console.error('Network error during checkout:', error);
+    alert('Network error: ' + error.message);
+  }
+}
+
+window.finishCheckout = finishCheckout;
 
 window.addEventListener('message', (event) => {
   console.log('Cart page received message:', event.data);
@@ -176,15 +221,12 @@ function handleUrlProduct() {
   return false;
 }
 
-// Load existing cart first
 loadCart();
 
-// Then check for new product in URL
 if (handleUrlProduct()) {
   console.log('Product added from URL parameter');
 }
 
-// Also listen for URL changes (when tab is updated)
 let lastUrl = window.location.href;
 setInterval(() => {
   if (window.location.href !== lastUrl) {

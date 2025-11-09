@@ -51,18 +51,14 @@ document.getElementById('readBtn').addEventListener('click', async () => {
       seller: geminiData.seller || null,
       reviews: geminiData.reviews || [],
       shippingFrom: geminiData.shippingFrom || null,
-      fulfilledBy: null,
       availability: geminiData.availability || null,
       brand: geminiData.brand || null,
-      co2Score: 50
     };
 
     await handleProductData(productData, tab.url, true);
     
   } catch (error) {
-    console.error('Screenshot extraction failed:', error);
-    document.getElementById('productInfo').innerHTML = '<div class="error">Screenshot failed. Trying fallback method...</div>';
-    
+    console.error('Screenshot extraction failed:', error);    
     chrome.tabs.sendMessage(tab.id, { action: 'getProductInfo' }, async (response) => {
       await handleProductData(response || {}, tab.url);
     });
@@ -164,13 +160,12 @@ async function handleProductData(response, url, fromGemini = false) {
     seller: response.soldBy || response.seller || null,
     reviews: response.reviews || [],
     shippingFrom: response.shipsFrom || response.shippingFrom || null,
-    fulfilledBy: response.fulfilledBy || null,
     availability: response.availability || null,
-    brand: response.brand || null,
-    co2Score: 50
+    brand: response.brand || null
   };
 
   let html = '';
+  html += `<div class="header">Product Description:</div>`
   html += `<div class="product-title">${productData.name || 'Unknown Product'}</div>`;
   html += `<div class="product-detail"><strong>Platform:</strong> ${productData.platform || 'Unknown'}</div>`;
   
@@ -185,6 +180,9 @@ async function handleProductData(response, url, fromGemini = false) {
   }
   if (productData.shippingFrom) {
     html += `<div class="product-detail"><strong>Ships From:</strong> ${productData.shippingFrom}</div>`;
+  }
+  if (response.image) {
+      html += `<div class="product-detail"><img src="${response.image}" style="max-width: 100%; height: auto; margin-top: 10px; border-radius: 5px;" /></div>`;
   }
 
   infoDiv.innerHTML = html;
@@ -202,18 +200,22 @@ async function handleProductData(response, url, fromGemini = false) {
 
     if (apiResponse.ok) {
       const result = await apiResponse.json();
-      html += `<div class="success" style="margin-top: 15px; padding: 10px; background: #4caf50; color: white; border-radius: 5px;">✓ Product analyzed! Finding eco-friendly alternatives...</div>`;
+      let bestScore = false;
+      if (apiResponse.C0Score < apiResponse.link1C0Score && apiResponse.C0Score < apiResponse.link2C0Score && apiResponse.C0Score < apiResponse.link3C0Score && apiResponse.C0Score < apiResponse.link4C0Score && apiResponse.C0Score < apiResponse.link5C0Score) {
+        bestScore = true;
+      }
+      if (bestScore) {
+        html += `<div class="success" style="font-weight: bold; font-size: 16px; margin-top: 15px; padding: 20px; background: #4caf50; color: white; border-radius: 5px;">Calculated C0 Score: ${apiResponse.C0Score}<br>Congrats, this was the best C0 score among similar products! Feel free to explore eco-friendly alternatives...</div>`;
+      }
+      html += `<div class="success" style="font-weight: bold; font-size: 16px; margin-top: 15px; padding: 20px; background: #4caf50; color: white; border-radius: 5px;">Calculated C0 Score: ${apiResponse.C0Score}<br>Check out these eco-friendly alternatives...</div>`;
       infoDiv.innerHTML = html;
-      
-      setTimeout(async () => {
-        await showAlternatives(productData);
-      }, 1000);
+      await showAlternatives(productData, apiResponse);
     } else {
-      html += `<div class="error" style="margin-top: 15px; padding: 10px; background: #f44336; color: white; border-radius: 5px;">✗ Failed to send data. Status: ${apiResponse.status}</div>`;
+      html += `<div class="error" style="font-weight: bold; font-size: 16px; margin-top: 15px; padding: 20px; background: #f44336; color: white; border-radius: 5px;">Failed to send data. Status: ${apiResponse.status}</div>`;
       infoDiv.innerHTML = html;
     }
   } catch (error) {
-    html += `<div class="error" style="margin-top: 15px; padding: 10px; background: #f44336; color: white; border-radius: 5px;">✗ Error: ${error.message}. Make sure the backend server is running.</div>`;
+    html += `<div class="error" style="font-weight: bold; font-size: 16px; margin-top: 15px; padding: 20px; background: #f44336; color: white; border-radius: 5px;">Error: ${error.message}. Make sure the backend server is running.</div>`;
     infoDiv.innerHTML = html;
   }
 
@@ -221,68 +223,63 @@ async function handleProductData(response, url, fromGemini = false) {
   document.getElementById('readBtn').textContent = 'Analyze Product';
 }
 
-async function showAlternatives(originalProduct) {
+async function showAlternatives(originalProduct, analysis) {
   const infoDiv = document.getElementById('productInfo');
-  
-  const originalCO2 = originalProduct.co2Score || 50;
-  
-  const alternatives = [
-    {
-      name: 'Eco-Friendly Alternative 1',
-      price: '$24.99',
-      co2Score: 12,
-      co2Saved: originalCO2 - 12,
-      merchant: 'EcoStore',
-      url: 'https://example.com/product1',
-      image: originalProduct.image
-    },
-    {
-      name: 'Sustainable Option 2',
-      price: '$29.99',
-      co2Score: 18,
-      co2Saved: originalCO2 - 18,
-      merchant: 'GreenMarket',
-      url: 'https://example.com/product2',
-      image: originalProduct.image
-    },
-    {
-      name: 'Carbon-Neutral Choice 3',
-      price: '$27.50',
-      co2Score: 8,
-      co2Saved: originalCO2 - 8,
-      merchant: 'EarthFriendly',
-      url: 'https://example.com/product3',
-      image: originalProduct.image
-    }
-  ];
 
   let html = infoDiv.innerHTML;
-  html += `<div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #2e7d32;"><strong style="color: #2e7d32; font-size: 16px;">🌱 Eco-Friendly Alternatives:</strong></div>`;
-  
-  alternatives.forEach((alt, index) => {
-    html += `
+  html += `<div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #2e7d32;"><strong style="color: #2e7d32; font-size: 16px;">Eco-Friendly Alternatives:</strong></div>`;
+  html += `
       <div style="margin-top: 15px; padding: 12px; background: #f1f8f4; border-radius: 6px; border-left: 4px solid #2e7d32;">
-        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">${alt.name}</div>
-        <div style="color: #666; font-size: 13px; margin: 3px 0;"><strong>Price:</strong> ${alt.price}</div>
-        <div style="color: #2e7d32; font-size: 13px; margin: 3px 0; font-weight: bold;"><strong>CO₂ Score:</strong> ${alt.co2Score} kg</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0; font-weight: bold;"><strong>CO₂ Saved:</strong> ${alt.co2Saved} kg</div>
-        <div style="color: #666; font-size: 13px; margin: 3px 0;"><strong>Merchant:</strong> ${alt.merchant}</div>
-        <button class="add-to-cart-btn" data-index="${index}" style="margin-top: 8px; background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 14px;">Add to Carbon0 Cart</button>
+        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">Suggestion 1</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Website:</strong> ${analysis.link1}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>C0 Score:</strong> ${analysis.link1C0Score}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Suggestion Explanation:</strong> ${analysis.link1Explanation}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Image:</strong> ${analysis.link1Image}</div>
+        <button class="add-to-cart-btn" data-index="1" style="margin-top: 8px; background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 14px;">Add to Carbon0 Cart</button>
       </div>
-    `;
-  });
+      <div style="margin-top: 15px; padding: 12px; background: #f1f8f4; border-radius: 6px; border-left: 4px solid #2e7d32;">
+        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">Suggestion 2</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Website:</strong> ${analysis.link2}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>C0 Score:</strong> ${analysis.link2C0Score}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Suggestion Explanation:</strong> ${analysis.link2Explanation}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Image:</strong> ${analysis.link2Image}</div>
+        <button class="add-to-cart-btn" data-index="2" style="margin-top: 8px; background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 14px;">Add to Carbon0 Cart</button>
+      </div>
+      <div style="margin-top: 15px; padding: 12px; background: #f1f8f4; border-radius: 6px; border-left: 4px solid #2e7d32;">
+        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">Suggestion 3</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Website:</strong> ${analysis.link3}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>C0 Score:</strong> ${analysis.link3C0Score}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Suggestion Explanation:</strong> ${analysis.link3Explanation}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Image:</strong> ${analysis.link3Image}</div>
+        <button class="add-to-cart-btn" data-index="3" style="margin-top: 8px; background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 14px;">Add to Carbon0 Cart</button>
+      </div>
+      <div style="margin-top: 15px; padding: 12px; background: #f1f8f4; border-radius: 6px; border-left: 4px solid #2e7d32;">
+        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">Suggestion 4</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Website:</strong> ${analysis.link4}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>C0 Score:</strong> ${analysis.link4C0Score}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Suggestion Explanation:</strong> ${analysis.link4Explanation}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Image:</strong> ${analysis.link4Image}</div>
+        <button class="add-to-cart-btn" data-index="4" style="margin-top: 8px; background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 14px;">Add to Carbon0 Cart</button>
+      </div>
+      <div style="margin-top: 15px; padding: 12px; background: #f1f8f4; border-radius: 6px; border-left: 4px solid #2e7d32;">
+        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">Suggestion 5</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Website:</strong> ${analysis.link5}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>C0 Score:</strong> ${analysis.link5C0Score}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Suggestion Explanation:</strong> ${analysis.link5Explanation}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Image:</strong> ${analysis.link5Image}</div>
+        <button class="add-to-cart-btn" data-index="5" style="margin-top: 8px; background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 14px;">Add to Carbon0 Cart</button>
+      </div>
+  `;
   
   infoDiv.innerHTML = html;
   
   document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       const index = parseInt(e.target.getAttribute('data-index'));
-      await addToCarbon0Cart(alternatives[index], originalProduct);
+      const alternative = {link: `analysis.link${index}`, C0Score: `analysis.link${index}C0Score`, Explanation: `analysis.link${index}Explanation`, Image: `analysis.link${index}Image`};
+      await addToCarbon0Cart(index, originalProduct);
     });
   });
-  
-  // Don't auto-open cart - let user decide when to view it
-  // User can click "Add to Carbon0 Cart" to open it
 }
 
 async function addToCarbon0Cart(alternative, originalProduct) {
@@ -293,13 +290,10 @@ async function addToCarbon0Cart(alternative, originalProduct) {
   try {
     const cartData = {
       alternative: {
-        name: alternative.name,
-        price: alternative.price,
-        url: alternative.url,
-        image: alternative.image || originalProduct.image,
-        merchant: alternative.merchant,
-        co2Score: alternative.co2Score,
-        co2Saved: alternative.co2Saved
+        url: alternative.link,
+        image: alternative.Image,
+        C0Score: alternative.C0Score,
+        explanation: alternative.Explanation
       },
       original: {
         name: originalProduct.name,
@@ -310,24 +304,21 @@ async function addToCarbon0Cart(alternative, originalProduct) {
       }
     };
     
-    // Always use URL parameter method - more reliable
     chrome.tabs.query({ url: `${BACKEND_URL}/cart*` }, (tabs) => {
       if (tabs.length > 0) {
-        // Cart tab exists - update URL with product data
         chrome.tabs.update(tabs[0].id, { 
           url: `${BACKEND_URL}/cart?product=${encodeURIComponent(JSON.stringify(cartData))}`,
-          active: false  // Keep popup visible
+          active: false 
         });
       } else {
-        // No cart tab - create one in background
         chrome.tabs.create({ 
           url: `${BACKEND_URL}/cart?product=${encodeURIComponent(JSON.stringify(cartData))}`,
-          active: false  // Open in background so popup stays visible
+          active: false 
         });
       }
     });
     
-    btn.textContent = '✓ Added!';
+    btn.textContent = 'Added!';
     btn.style.background = '#4caf50';
     setTimeout(() => {
       btn.disabled = false;
@@ -337,7 +328,7 @@ async function addToCarbon0Cart(alternative, originalProduct) {
     
   } catch (error) {
     console.error('Cart error:', error);
-    btn.textContent = `✗ Error`;
+    btn.textContent = `Error`;
     btn.style.background = '#f44336';
     setTimeout(() => {
       btn.disabled = false;
