@@ -1,0 +1,18 @@
+{
+  "product_brand": "Sweetcrispy",
+  "product_name": "Ergonomic Office Desk Chair",
+  "carbon_data": {
+    "product_weight": {
+      "value": 0.6,
+      "source": "from extension"
+    },
+    "manufacturing_factor": "0.1",
+    "manufacturing_factor_source": "LLM estimation",
+    "transport": "50",
+    "transport_source": "LLM estimation",
+    "packaging": "2",
+    "packaging_source": "LLM estimation"
+  },
+  "last_updated": "2025-11-08T21:34:30.499812",
+  "completeness": 60.0
+}
