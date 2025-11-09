@@ -200,16 +200,31 @@ async function handleProductData(response, url, fromGemini = false) {
 
     if (apiResponse.ok) {
       const result = await apiResponse.json();
-      let bestScore = false;
-      if (apiResponse.C0Score < apiResponse.link1C0Score && apiResponse.C0Score < apiResponse.link2C0Score && apiResponse.C0Score < apiResponse.link3C0Score && apiResponse.C0Score < apiResponse.link4C0Score && apiResponse.C0Score < apiResponse.link5C0Score) {
-        bestScore = true;
-      }
+      const parseScore = (value) => {
+        if (typeof value === 'number') return value;
+        if (typeof value === 'string') {
+          const parsed = parseFloat(value);
+          return Number.isFinite(parsed) ? parsed : null;
+        }
+        return null;
+      };
+
+      const productScore = parseScore(result.C0Score);
+      const alternativeScores = [1, 2, 3, 4, 5]
+        .map((idx) => parseScore(result[`link${idx}C0Score`]))
+        .filter((score) => score !== null);
+      const bestScore = productScore !== null &&
+        alternativeScores.length > 0 &&
+        alternativeScores.every((score) => productScore < score);
+
       if (bestScore) {
-        html += `<div class="success" style="font-weight: bold; font-size: 16px; margin-top: 15px; padding: 20px; background: #4caf50; color: white; border-radius: 5px;">Calculated C0 Score: ${apiResponse.C0Score}<br>Congrats, this was the best C0 score among similar products! Feel free to explore eco-friendly alternatives...</div>`;
+        html += `<div class="success" style="font-weight: bold; font-size: 16px; margin-top: 15px; padding: 20px; background: #4caf50; color: white; border-radius: 5px;">Calculated C0 Score: ${result.C0Score ?? 'N/A'}<br>Congrats, this was the best C0 score among similar products! Feel free to explore eco-friendly alternatives...</div>`;
+      } else {
+        html += `<div class="success" style="font-weight: bold; font-size: 16px; margin-top: 15px; padding: 20px; background: #4caf50; color: white; border-radius: 5px;">Calculated C0 Score: ${result.C0Score ?? 'N/A'}<br>Check out these eco-friendly alternatives...</div>`;
       }
-      html += `<div class="success" style="font-weight: bold; font-size: 16px; margin-top: 15px; padding: 20px; background: #4caf50; color: white; border-radius: 5px;">Calculated C0 Score: ${apiResponse.C0Score}<br>Check out these eco-friendly alternatives...</div>`;
+
       infoDiv.innerHTML = html;
-      await showAlternatives(productData, apiResponse);
+      await showAlternatives(productData, result);
     } else {
       html += `<div class="error" style="font-weight: bold; font-size: 16px; margin-top: 15px; padding: 20px; background: #f44336; color: white; border-radius: 5px;">Failed to send data. Status: ${apiResponse.status}</div>`;
       infoDiv.innerHTML = html;
@@ -225,65 +240,59 @@ async function handleProductData(response, url, fromGemini = false) {
 
 async function showAlternatives(originalProduct, analysis) {
   const infoDiv = document.getElementById('productInfo');
-
   let html = infoDiv.innerHTML;
+
+  const alternatives = [];
+  for (let i = 1; i <= 5; i++) {
+    const alt = {
+      index: i,
+      link: analysis[`link${i}`],
+      C0Score: analysis[`link${i}C0Score`],
+      explanation: analysis[`link${i}Explanation`],
+      image: analysis[`link${i}Image`]
+    };
+    if (alt.link) {
+      alternatives.push(alt);
+    }
+  }
+
+  if (!alternatives.length) {
+    infoDiv.innerHTML = `${html}<div class="error" style="font-weight: bold; font-size: 16px; margin-top: 15px; padding: 20px; background: #ffebee; color: #d32f2f; border-radius: 5px;">No eco-friendly alternatives were returned. Try another product or check the backend logs.</div>`;
+    return;
+  }
+
   html += `<div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #2e7d32;"><strong style="color: #2e7d32; font-size: 16px;">Eco-Friendly Alternatives:</strong></div>`;
-  html += `
+  alternatives.forEach((alt) => {
+    html += `
       <div style="margin-top: 15px; padding: 12px; background: #f1f8f4; border-radius: 6px; border-left: 4px solid #2e7d32;">
-        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">Suggestion 1</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Website:</strong> ${analysis.link1}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>C0 Score:</strong> ${analysis.link1C0Score}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Suggestion Explanation:</strong> ${analysis.link1Explanation}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Image:</strong> ${analysis.link1Image}</div>
-        <button class="add-to-cart-btn" data-index="1" style="margin-top: 8px; background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 14px;">Add to Carbon0 Cart</button>
+        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">Suggestion ${alt.index}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Website:</strong> <a href="${alt.link}" target="_blank">${alt.link}</a></div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>C0 Score:</strong> ${alt.C0Score ?? 'N/A'}</div>
+        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Suggestion Explanation:</strong> ${alt.explanation || 'Not provided'}</div>
+        ${alt.image ? `<div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Image:</strong> <img src="${alt.image}" alt="Alternative ${alt.index}" style="max-width: 100%; height: auto; margin-top: 10px; border-radius: 5px;" /></div>` : ''}
+        <button class="add-to-cart-btn" data-index="${alt.index}" style="margin-top: 8px; background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 14px;">Add to Carbon0 Cart</button>
       </div>
-      <div style="margin-top: 15px; padding: 12px; background: #f1f8f4; border-radius: 6px; border-left: 4px solid #2e7d32;">
-        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">Suggestion 2</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Website:</strong> ${analysis.link2}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>C0 Score:</strong> ${analysis.link2C0Score}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Suggestion Explanation:</strong> ${analysis.link2Explanation}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Image:</strong> ${analysis.link2Image}</div>
-        <button class="add-to-cart-btn" data-index="2" style="margin-top: 8px; background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 14px;">Add to Carbon0 Cart</button>
-      </div>
-      <div style="margin-top: 15px; padding: 12px; background: #f1f8f4; border-radius: 6px; border-left: 4px solid #2e7d32;">
-        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">Suggestion 3</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Website:</strong> ${analysis.link3}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>C0 Score:</strong> ${analysis.link3C0Score}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Suggestion Explanation:</strong> ${analysis.link3Explanation}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Image:</strong> ${analysis.link3Image}</div>
-        <button class="add-to-cart-btn" data-index="3" style="margin-top: 8px; background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 14px;">Add to Carbon0 Cart</button>
-      </div>
-      <div style="margin-top: 15px; padding: 12px; background: #f1f8f4; border-radius: 6px; border-left: 4px solid #2e7d32;">
-        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">Suggestion 4</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Website:</strong> ${analysis.link4}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>C0 Score:</strong> ${analysis.link4C0Score}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Suggestion Explanation:</strong> ${analysis.link4Explanation}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Image:</strong> ${analysis.link4Image}</div>
-        <button class="add-to-cart-btn" data-index="4" style="margin-top: 8px; background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 14px;">Add to Carbon0 Cart</button>
-      </div>
-      <div style="margin-top: 15px; padding: 12px; background: #f1f8f4; border-radius: 6px; border-left: 4px solid #2e7d32;">
-        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">Suggestion 5</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Website:</strong> ${analysis.link5}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>C0 Score:</strong> ${analysis.link5C0Score}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Suggestion Explanation:</strong> ${analysis.link5Explanation}</div>
-        <div style="color: #4caf50; font-size: 13px; margin: 3px 0;"><strong>Image:</strong> ${analysis.link5Image}</div>
-        <button class="add-to-cart-btn" data-index="5" style="margin-top: 8px; background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 14px;">Add to Carbon0 Cart</button>
-      </div>
-  `;
+    `;
+  });
   
   infoDiv.innerHTML = html;
   
-  document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const index = parseInt(e.target.getAttribute('data-index'));
-      const alternative = {link: `analysis.link${index}`, C0Score: `analysis.link${index}C0Score`, Explanation: `analysis.link${index}Explanation`, Image: `analysis.link${index}Image`};
-      await addToCarbon0Cart(index, originalProduct);
-    });
+  alternatives.forEach((alt) => {
+    const btn = infoDiv.querySelector(`.add-to-cart-btn[data-index="${alt.index}"]`);
+    if (btn) {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await addToCarbon0Cart(alt, originalProduct, e.target);
+      });
+    }
   });
 }
 
-async function addToCarbon0Cart(alternative, originalProduct) {
-  const btn = event.target;
+async function addToCarbon0Cart(alternative, originalProduct, btn) {
+  if (!btn) {
+    return;
+  }
+  
   btn.disabled = true;
   btn.textContent = 'Adding...';
   
@@ -291,9 +300,9 @@ async function addToCarbon0Cart(alternative, originalProduct) {
     const cartData = {
       alternative: {
         url: alternative.link,
-        image: alternative.Image,
+        image: alternative.image,
         C0Score: alternative.C0Score,
-        explanation: alternative.Explanation
+        explanation: alternative.explanation
       },
       original: {
         name: originalProduct.name,
