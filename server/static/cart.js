@@ -189,6 +189,9 @@ async function finishCheckout() {
     const originalScore = parseFloat(item.original?.C0Score) || 0;
     const alternativeScore = parseFloat(item.alternative?.C0Score) || 0;
     return sum + (originalScore - alternativeScore);
+    const originalScore = parseFloat(item.original?.C0Score) || 0;
+    const alternativeScore = parseFloat(item.alternative?.C0Score) || 0;
+    return sum + (originalScore - alternativeScore);
   }, 0);
   
   // Save carbon-total to localStorage

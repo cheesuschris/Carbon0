@@ -241,23 +241,26 @@
             console.error('Error fetching carbon total:', error);
             document.getElementById('carbon-total').textContent = '0';
         }
-        function animateValue(element, start, end, duration) {
-            const range = end - start;
-            const increment = range / (duration / 16);
-            let current = start;
-            
-            const timer = setInterval(() => {
-                current += increment;
-                if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
-                    current = end;
-                    clearInterval(timer);
-                }
-                element.textContent = current.toFixed(1);
-            }, 16);
-        }
-        loadCarbonTotal();
-        setInterval(loadCarbonTotal, 30000);
     }
+
+    function animateValue(element, start, end, duration) {
+        const range = end - start;
+        const increment = range / (duration / 16);
+        let current = start;
+        
+        const timer = setInterval(() => {
+            current += increment;
+            // Check if we've reached the end value regardless of direction
+            if (Math.abs(current - end) < Math.abs(increment)) {
+                current = end;
+                clearInterval(timer);
+            }
+            element.textContent = current.toFixed(1);
+        }, 16);
+    }
+
+    loadCarbonTotal();
+    setInterval(loadCarbonTotal, 30000);
 </script>
 </body>
 </html>

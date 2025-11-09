@@ -47,6 +47,7 @@ def cart_checkout():
             }), 201
         else:
             new_amount = mongo.db.TotalCarbonReduced.find_one().get('Total') + amount
+            print(new_amount)
             mongo.db.TotalCarbonReduced.update_one(
                 {'_id': mongo.db.TotalCarbonReduced.find_one()['_id']},
                 {'$set': {'Total': new_amount}}
