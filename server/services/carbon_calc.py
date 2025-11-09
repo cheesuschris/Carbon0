@@ -1,21 +1,42 @@
+def _safe_float(value, default=0.0):
+    """
+    Convert potentially missing/invalid numeric inputs to floats.
+    Falls back to default (0.0) when the LLM left the field empty.
+    """
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def calculate_carbon_footprint(data):
-    # 1. Material
-    cf_material = sum(m["weight"] * m["emission_factor"] for m in data["materials"])
+    data = data or {}
 
-    # 2. Manufacturing
-    cf_manufacturing = cf_material * data["manufacturing_factor"]["value"]
+    materials = data.get("materials") or []
+    cf_material = 0.0
+    for material in materials:
+        material = material or {}
+        weight = _safe_float(material.get("weight"))
+        emission_factor = _safe_float(material.get("emission_factor"))
+        cf_material += weight * emission_factor
 
-    # 3. Tranportation
+    manufacturing_factor = (data.get("manufacturing_factor") or {}).get("value")
+    cf_manufacturing = cf_material * _safe_float(manufacturing_factor)
+
+    transport = data.get("transport") or {}
+    product_weight = (data.get("product_weight") or {}).get("value")
     cf_transport = (
-        data["product_weight"]["value"]
-        * data["transport"]["distance_km"]
-        * data["transport"]["emission_factor_ton_km"]
+        _safe_float(product_weight)
+        * _safe_float(transport.get("distance_km"))
+        * _safe_float(transport.get("emission_factor_ton_km"))
         / 1000
-    )  # Transfer kg CO₂e
+    )
 
-    # 4. Packaging
+    packaging = data.get("packaging") or {}
     cf_packaging = (
-        data["packaging"]["weight"] * data["packaging"]["emission_factor"]
+        _safe_float(packaging.get("weight")) * _safe_float(packaging.get("emission_factor"))
     )
 
     cf_total = cf_material + cf_manufacturing + cf_transport + cf_packaging

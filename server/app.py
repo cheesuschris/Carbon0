@@ -6,8 +6,8 @@ import os
 # Basic logging configuration for development
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
-from routes.product import bp as product_bp
-from database import init_db
+from server.routes.product import bp as product_bp
+from server.database import init_db
 
 app = Flask(__name__)
 CORS(app)
